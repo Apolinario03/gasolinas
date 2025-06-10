@@ -13,6 +13,7 @@ DB_CONFIG = {
 }
 
 # Ruta del archivo Excel
+ESTACION_OBJETIVO = 'America Soler'  # Cambiar si se carga otra estación
 ARCHIVO_EXCEL = r'C:\Users\sistemas\Desktop\gasolinas\INVENTARIO_17_03_2020.xlsx'
 
 # Crear la base de datos y las tablas
@@ -81,7 +82,8 @@ def cargar_inventario():
         conn = mysql.connector.connect(**DB_CONFIG)
         cursor = conn.cursor()
 
-        cursor.execute("SELECT id FROM estacion WHERE nombre = 'La Rinconada'")
+        #cursor.execute("SELECT id FROM estacion WHERE nombre = 'La Rinconada'")
+        cursor.execute("SELECT id FROM estacion WHERE nombre = %s", (ESTACION_OBJETIVO,))
         estacion_id = cursor.fetchone()[0]
 
         xls = pd.ExcelFile(ARCHIVO_EXCEL)
