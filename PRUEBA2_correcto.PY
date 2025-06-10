@@ -13,7 +13,7 @@ DB_CONFIG = {
 }
 
 # Estación objetivo y archivo Excel
-ESTACION_OBJETIVO = 'America Soler'  # Cambiar si se carga otra estación
+ESTACION_OBJETIVO = 'America Soler'
 ARCHIVO_EXCEL = r'C:\Users\sistemas\Desktop\gasolinas\america_mayo_2025.xlsx'
 
 def cargar_inventario():
@@ -21,7 +21,7 @@ def cargar_inventario():
         conn = mysql.connector.connect(**DB_CONFIG)
         cursor = conn.cursor()
 
-        # Obtener id de la estación
+        # Obtener ID de la estación
         cursor.execute("SELECT id FROM estacion WHERE nombre = %s", (ESTACION_OBJETIVO,))
         estacion_row = cursor.fetchone()
         if not estacion_row:
@@ -31,23 +31,26 @@ def cargar_inventario():
         xls = pd.ExcelFile(ARCHIVO_EXCEL)
         for nombre_hoja in xls.sheet_names:
             try:
-                fecha = datetime.strptime(f'2025-05-{nombre_hoja.zfill(2)}', '%Y-%m-%d').date()
+                # Intentar convertir el nombre de la hoja a una fecha real (ej. '01-05-2025')
+                fecha = datetime.strptime(nombre_hoja.strip(), '%d-%m-%Y').date()
             except Exception:
                 print(f"⚠️ Hoja '{nombre_hoja}' ignorada: no es un día válido.")
                 continue
 
-            df = pd.read_excel(xls, sheet_name=nombre_hoja, header=None, skiprows=5, nrows=8)
+            df = pd.read_excel(xls, sheet_name=nombre_hoja, header=None, skiprows=5, nrows=5)
 
-            for i in range(df.shape[0]):  # Leer todas las filas del bloque
+            for i in range(df.shape[0]):
                 producto = str(df.iloc[i, 0]).strip()
-                cantidad = pd.to_numeric(df.iloc[i, 13], errors='coerce')      # VENTA GLNS (columna O)
-                venta_soles = pd.to_numeric(df.iloc[i, 15], errors='coerce')   # VENTA SOLES (columna P)
+                cantidad = pd.to_numeric(df.iloc[i, 13], errors='coerce')  # Columna O (índice 13)
+                venta_soles = pd.to_numeric(df.iloc[i, 14], errors='coerce')  # Columna Q (índice 15)
 
-                # Mostrar para depuración
-                print(f"{fecha} - Producto: '{producto}', GLNS: {cantidad}, SOLES: {venta_soles}")
-
-                if not producto or pd.isna(cantidad) or cantidad == 0:
+                if not producto or pd.isna(cantidad) or cantidad <= 0 or pd.isna(venta_soles):
                     continue
+
+                precio_venta = round(venta_soles / cantidad, 3) if cantidad else 0
+
+                # Mostrar para depuración en el orden solicitado
+                print(f"{fecha} - Producto: '{producto}' | Galones: {cantidad:.2f} | Precio: S/{precio_venta:.3f} | Venta: S/{venta_soles:.2f}")
 
                 # Verificar o insertar producto
                 cursor.execute("SELECT id FROM productos WHERE nombre = %s", (producto,))
@@ -58,11 +61,11 @@ def cargar_inventario():
                     cursor.execute("INSERT INTO productos (nombre, descripcion) VALUES (%s, '')", (producto,))
                     producto_id = cursor.lastrowid
 
-                # Insertar en inventario con venta_soles
+                # Insertar en inventario
                 cursor.execute("""
-                    INSERT INTO inventario (productoid, estacionid, fecha, cantidad, venta_soles)
-                    VALUES (%s, %s, %s, %s, %s)
-                """, (producto_id, estacion_id, fecha, cantidad, venta_soles))
+                    INSERT INTO inventario (productoid, estacionid, fecha, cantidad, precio_venta, venta_soles)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """, (producto_id, estacion_id, fecha, cantidad, precio_venta, venta_soles))
 
         conn.commit()
         print(f"\n✅ Inventario de '{ESTACION_OBJETIVO}' cargado correctamente.")
@@ -74,5 +77,3 @@ def cargar_inventario():
 
 if __name__ == "__main__":
     cargar_inventario()
-
-
