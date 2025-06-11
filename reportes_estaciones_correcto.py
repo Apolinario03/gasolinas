@@ -1,0 +1,87 @@
+import mysql.connector
+import pandas as pd
+from fpdf import FPDF
+
+# Configuración de conexión a la base de datos
+DB_CONFIG = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': 'Sistemas321',
+    'database': 'gasolinas1',
+    'charset': 'utf8mb4',
+    'collation': 'utf8mb4_general_ci'
+}
+
+def obtener_datos_ventas(estacion_id):
+    """Obtiene todas las ventas de productos para la estación dada"""
+    conn = mysql.connector.connect(**DB_CONFIG)
+    query = """
+    SELECT p.nombre AS producto, i.cantidad, i.precio_venta, i.venta_soles, i.fecha
+    FROM inventario i
+    JOIN productos p ON i.productoid = p.id
+    WHERE i.estacionid = %s
+    ORDER BY i.fecha ASC
+    """
+    df = pd.read_sql(query, conn, params=(estacion_id,))
+    conn.close()
+
+    # Convertir 'fecha' a datetime para evitar error .dt
+    df['fecha'] = pd.to_datetime(df['fecha'], errors='coerce')
+
+    return df
+
+def crear_reporte_pdf(estacion_nombre, df, nombre_archivo):
+    """Crea un reporte PDF con los datos de ventas"""
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", "B", 14)
+    pdf.cell(0, 10, f"Reporte de ventas - Estación: {estacion_nombre}", ln=True, align="C")
+    pdf.ln(10)
+
+    # Resumen mensual
+    df['mes'] = df['fecha'].dt.to_period('M')
+    resumen_mensual = df.groupby('mes').agg(
+        cantidad_total=pd.NamedAgg(column='cantidad', aggfunc='sum'),
+        ventas_totales=pd.NamedAgg(column='venta_soles', aggfunc='sum')
+    ).reset_index()
+
+    pdf.set_font("Arial", "B", 12)
+    pdf.cell(0, 10, "Resumen Mensual", ln=True)
+    pdf.set_font("Arial", "", 11)
+    for _, row in resumen_mensual.iterrows():
+        pdf.cell(0, 8, f"{row['mes']}: Cantidad Total = {row['cantidad_total']}, Ventas Totales = S/. {row['ventas_totales']:.2f}", ln=True)
+    pdf.ln(10)
+
+    # Tabla de ventas detalladas
+    pdf.set_font("Arial", "B", 12)
+    pdf.cell(0, 10, "Ventas Diarias", ln=True)
+    pdf.set_font("Arial", "B", 10)
+    pdf.cell(50, 8, "Producto", border=1)
+    pdf.cell(30, 8, "Cantidad", border=1)
+    pdf.cell(30, 8, "Precio Venta", border=1)
+    pdf.cell(40, 8, "Venta S/.", border=1)
+    pdf.cell(40, 8, "Fecha", border=1)
+    pdf.ln()
+
+    pdf.set_font("Arial", "", 10)
+    for _, row in df.iterrows():
+        pdf.cell(50, 8, str(row['producto'])[:25], border=1)
+        pdf.cell(30, 8, f"{row['cantidad']}", border=1)
+        pdf.cell(30, 8, f"S/. {row['precio_venta']:.2f}", border=1)
+        pdf.cell(40, 8, f"S/. {row['venta_soles']:.2f}", border=1)
+        fecha_str = row['fecha'].strftime('%Y-%m-%d') if pd.notnull(row['fecha']) else "N/A"
+        pdf.cell(40, 8, fecha_str, border=1)
+        pdf.ln()
+
+    pdf.output(nombre_archivo)
+    print(f"Reporte PDF generado: {nombre_archivo}")
+
+if __name__ == "__main__":
+    estacion_id = input("Ingresa ID de estación para reporte: ")
+    estacion_nombre = input("Ingresa nombre de la estación: ")
+
+    df_ventas = obtener_datos_ventas(estacion_id)
+    if df_ventas.empty:
+        print("No hay datos de ventas para esa estación.")
+    else:
+        crear_reporte_pdf(estacion_nombre, df_ventas, f"reporte_ventas_estacion_{estacion_id}.pdf")

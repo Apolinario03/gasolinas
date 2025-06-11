@@ -11,7 +11,7 @@ DB_CONFIG = {
     'password': 'Sistemas321',
     'database': 'gasolinas1',
     'charset': 'utf8mb4',
-    'collation': 'utf8mb4_general_ci'
+    'collation': 'utf8mb4_general_ci' 
 }
 
 # Configuración de rutas
@@ -112,7 +112,7 @@ def cargar_inventario_estacion(estacion_id, nombre_estacion):
             
             try:
                 # Leer datos de la hoja
-                df = pd.read_excel(xls, sheet_name=nombre_hoja, skiprows=5, nrows=8,
+                df = pd.read_excel(xls, sheet_name=nombre_hoja, skiprows=6, nrows=4,
                                    usecols=[0, 14], header=None)
                 df.columns = ['producto', 'cantidad']
                 df['FECHA'] = pd.to_datetime(nombre_hoja, dayfirst=True, errors='coerce')
