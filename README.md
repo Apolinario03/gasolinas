@@ -89,7 +89,7 @@ bash src/backup.sh
 
 ## 🧭 Diagrama de Flujo
 
-![Diagrama de flujo](imagenes/diagrama_flujo.png)
+![Diagrama de flujo](diagrama_flujo.png)
 
 ## 🧾 Ejemplo de Archivo Excel
 
