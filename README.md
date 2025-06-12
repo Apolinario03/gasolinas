@@ -104,7 +104,7 @@ El script `backup.sh` guarda una copia de seguridad de la base de datos con marc
 
 ## 🧑‍💻 Autor
 
-Desarrollado por [Tu Nombre o Empresa].
+Desarrollado por [ing. FREDY APOLINARIO ALCOCER].
 
 ## 📄 Licencia
 
