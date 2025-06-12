@@ -71,7 +71,7 @@ pip install -r requirements.txt
 
 ```bash
 python src/cargar_excel.py estaciones/LaRinconada.xlsx
-prueba3.1_correcto.py
+
 ```
 
 ### Generar reporte PDF:
