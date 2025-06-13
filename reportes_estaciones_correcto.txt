@@ -5,8 +5,8 @@ from fpdf import FPDF
 # Configuración de conexión a la base de datos
 DB_CONFIG = {
     'host': 'localhost',
-    'user': 'root',
-    'password': 'Sistemas321',
+    'user': 'Usuario',
+    'password': 'Clave_usuario',
     'database': 'gasolinas1',
     'charset': 'utf8mb4',
     'collation': 'utf8mb4_general_ci'
