@@ -1,0 +1,123 @@
+
+-- Vista de resumen de ventas por estación y fecha
+
+CREATE OR REPLACE VIEW vista_resumen_diario AS
+SELECT 
+    e.nombre AS estacion,
+    p.nombre AS producto,
+    i.fecha,
+    SUM(i.cantidad) AS total_galones,
+    SUM(i.venta_soles) AS total_soles,
+    AVG(i.precio_venta) AS precio_promedio
+FROM inventario i
+JOIN productos p ON i.productoid = p.id
+JOIN estacion e ON i.estacionid = e.id
+GROUP BY e.nombre, p.nombre, i.fecha;
+
+
+-- Vista de precios promedio por producto y estación
+
+CREATE OR REPLACE VIEW vista_precios_promedio AS
+SELECT 
+    e.nombre AS estacion,
+    p.nombre AS producto,
+    ROUND(AVG(i.precio_venta), 3) AS precio_promedio
+FROM inventario i
+JOIN productos p ON i.productoid = p.id
+JOIN estacion e ON i.estacionid = e.id
+GROUP BY e.nombre, p.nombre;
+
+
+
+-- Vista de volumen total vendido por producto
+
+CREATE OR REPLACE VIEW vista_ventas_por_producto AS
+SELECT 
+    p.nombre AS producto,
+    SUM(i.cantidad) AS total_galones,
+    SUM(i.venta_soles) AS total_ventas
+FROM inventario i
+JOIN productos p ON i.productoid = p.id
+GROUP BY p.nombre
+ORDER BY total_ventas DESC;
+
+
+-- Vista de control de carga de archivos
+
+CREATE OR REPLACE VIEW vista_archivos_procesados AS
+SELECT 
+    nombre_archivo,
+    hash,
+    DATE(fecha_procesado) AS fecha,
+    TIME(fecha_procesado) AS hora
+FROM archivos_procesados
+ORDER BY fecha_procesado DESC;
+
+
+-- Vista de ranking de estaciones por ventas
+
+
+CREATE OR REPLACE VIEW vista_ranking_estaciones AS
+SELECT 
+    e.nombre AS estacion,
+    SUM(i.venta_soles) AS total_ventas,
+    SUM(i.cantidad) AS total_galones
+FROM inventario i
+JOIN estacion e ON i.estacionid = e.id
+GROUP BY e.nombre
+ORDER BY total_ventas DESC;
+
+
+-- ventas por producto y por estación
+
+CREATE OR REPLACE VIEW vista_ventas_mensuales_por_estacion AS
+SELECT 
+    e.nombre AS estacion,
+    p.nombre AS producto,
+    DATE_FORMAT(i.fecha, '%Y-%m') AS mes,  -- Formato AAAA-MM
+    SUM(i.cantidad) AS total_galones,
+    SUM(i.venta_soles) AS total_ventas
+FROM inventario i
+JOIN productos p ON i.productoid = p.id
+JOIN estacion e ON i.estacionid = e.id
+GROUP BY e.nombre, p.nombre, mes
+ORDER BY mes DESC, e.nombre, p.nombre;
+
+
+-- vista_ventas_por_producto_estacion_fecha
+
+CREATE OR REPLACE VIEW vista_ventas_por_producto_estacion_fecha AS
+SELECT 
+    e.nombre AS estacion,
+    p.nombre AS producto,
+    i.fecha,
+    SUM(i.cantidad) AS total_galones,
+    SUM(i.venta_soles) AS total_ventas
+FROM inventario i
+JOIN productos p ON i.productoid = p.id
+JOIN estacion e ON i.estacionid = e.id
+GROUP BY e.nombre, p.nombre, i.fecha
+ORDER BY i.fecha DESC, e.nombre, p.nombre;
+
+-- muestra la vista vista_ventas_por_producto_estacion_fecha
+
+SELECT * FROM vista_ventas_por_producto_estacion_fecha;
+
+
+
+-- ventas por producto y por estación
+
+CREATE OR REPLACE VIEW vista_ventas_por_producto_estacion AS
+SELECT 
+    e.nombre AS estacion,
+    p.nombre AS producto,
+    SUM(i.cantidad) AS total_galones,
+    SUM(i.venta_soles) AS total_ventas
+FROM inventario i
+JOIN productos p ON i.productoid = p.id
+JOIN estacion e ON i.estacionid = e.id
+GROUP BY e.nombre, p.nombre
+ORDER BY e.nombre, total_ventas DESC;
+
+-- Esto te mostrará cuánto vendió cada producto por estación.
+SELECT * FROM vista_ventas_por_producto_estacion;
