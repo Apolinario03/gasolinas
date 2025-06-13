@@ -71,6 +71,7 @@ pip install -r requirements.txt
 
 ```bash
 python src/cargar_excel.py estaciones/LaRinconada.xlsx
+
 ```
 
 ### Generar reporte PDF:
@@ -89,7 +90,7 @@ bash src/backup.sh
 
 ## 🧭 Diagrama de Flujo
 
-![Diagrama de flujo](imagenes/diagrama_flujo.png)
+![Diagrama de flujo](diagrama_flujo.png)
 
 ## 🧾 Ejemplo de Archivo Excel
 
@@ -104,7 +105,7 @@ El script `backup.sh` guarda una copia de seguridad de la base de datos con marc
 
 ## 🧑‍💻 Autor
 
-Desarrollado por [Tu Nombre o Empresa].
+Desarrollado por [ FREDY APOLINARIO ALCOCER].
 
 ## 📄 Licencia
 
