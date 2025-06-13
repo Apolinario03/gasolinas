@@ -79,7 +79,7 @@ python src/cargar_excel.py estaciones/LaRinconada.xlsx
 ```bash
 python src/generar_pdf.py LaRinconada 2025-06-10
 ```
-![Generar reporte PDF]( sdsdsd)
+![Generar reporte PDF](reportes_estaciones_correcto.txt)
 
 ### Ejecutar backup de base de datos:
 
