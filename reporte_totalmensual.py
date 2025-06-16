@@ -70,4 +70,4 @@ def generar_reporte_mensual(anio, mes):
         print(f"❌ Error generando PDF: {e}")
 
 # Ejemplo de uso:
-generar_reporte_mensual(2020, 3)  # Reporte para marzo 2020
+generar_reporte_mensual(2025, 5)  # Reporte para marzo 2020

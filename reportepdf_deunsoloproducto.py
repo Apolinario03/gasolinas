@@ -72,4 +72,4 @@ def generar_reporte_producto(nombre_producto):
         print(f"❌ Error generando PDF: {e}")
 
 # Ejemplo de uso:
-generar_reporte_producto("DB5")
+generar_reporte_producto("PREMIUM")
